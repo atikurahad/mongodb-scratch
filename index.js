@@ -1,13 +1,19 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const app = express();
 
+const app = express();
 const PORT = 3001;
 
+app.use(express.json());
+app.use(express.urlencoded(true));
+
 // crate product schema
-const productsSchema= new mongoose.Schema({
-  title: String,
-  
+const productsSchema = new mongoose.Schema({
+  title: { 
+    type: String,
+     required: true 
+    },
+
   price: Number,
   descreption: String,
   createdAt: {
@@ -15,10 +21,9 @@ const productsSchema= new mongoose.Schema({
     default: Date.now,
   },
 });
-// create products model 
+// create products model
 
-
-const Product = mongoose.model("products",productsSchema)
+const Product = mongoose.model("products", productsSchema);
 
 const connecDB = async () => {
   try {
@@ -33,6 +38,21 @@ const connecDB = async () => {
 
 app.get("/", (req, res) => {
   res.send("Hi, Welcome to MongoDb");
+});
+app.post("/products", async (req, res) => {
+  try {
+    const newProduct = new Product({
+      title: req.body.title,
+      price: req.body.price,
+      descreption: req.body.descreption,
+    });
+
+    const productData = await newProduct.save();
+
+    res.status(201).send(productData);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
 });
 
 app.listen(PORT, async () => {
